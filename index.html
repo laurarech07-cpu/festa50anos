@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festa 50 Anos</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Festa 50 Anos</h1>
+        <p class="instrucao">Prepare seu sorriso! 📸</p>
+
+        <div class="camera-area">
+
+            <video id="camera" autoplay playsinline></video>
+
+            <img 
+                id="moldura" 
+                src="img/moldura.png"
+                alt="Moldura da festa"
+            >
+
+        </div>
+
+        <button id="tirarFoto">
+            📸 Tirar foto
+        </button>
+
+        <canvas id="canvas"></canvas>
+
+        <a id="baixar" style="display:none;">
+            Baixar foto
+        </a>
+
+    </div>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
