@@ -11,18 +11,23 @@ body {
 }
 
 body {
-  font-family: Arial, sans-serif;
   overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+/* Esta classe força o elemento a desaparecer */
+.escondido {
+  display: none !important;
 }
 
 .container {
   position: relative;
   width: 100%;
+  height: 100vh;
   height: 100dvh;
   background: #000;
 }
 
-/* Área que ocupa a tela inteira */
 .camera-area {
   position: absolute;
   inset: 0;
@@ -30,69 +35,86 @@ body {
   background: #000;
 }
 
-/* Câmera frontal espelhada */
+/* Câmera ocupando a tela inteira */
 #camera {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+
+  /* Espelha apenas a visualização */
   transform: scaleX(-1);
 }
 
-/* Moldura sobre a câmera */
+/* Moldura por cima da câmera */
 #moldura {
   position: absolute;
   inset: 0;
+
+  display: block;
+
   width: 100%;
   height: 100%;
+
   object-fit: contain;
+
   pointer-events: none;
+
   z-index: 2;
 }
 
-/* Foto pronta */
+/* Foto final */
 #fotoResultado {
   position: absolute;
   inset: 0;
+
   width: 100%;
   height: 100%;
+
   object-fit: cover;
-  z-index: 3;
+
+  z-index: 5;
 }
 
-/* Barra inferior estilo câmera */
+/* Área inferior da câmera */
 #controleCamera {
   position: fixed;
-  z-index: 10;
+
+  z-index: 20;
+
   left: 0;
   right: 0;
   bottom: 0;
+
   height: 125px;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
-  background:
-    linear-gradient(
-      to top,
-      rgba(0, 0, 0, 0.9),
-      rgba(0, 0, 0, 0)
-    );
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.92),
+    rgba(0, 0, 0, 0)
+  );
 }
 
-/* Botão circular estilo iPhone */
+/* Botão circular */
 #capturar {
+  position: relative;
+
   width: 74px;
   height: 74px;
 
   padding: 0;
 
   border: 5px solid #fff;
+
   border-radius: 50%;
 
   background: transparent;
-
-  position: relative;
 
   cursor: pointer;
 }
@@ -113,20 +135,15 @@ body {
   transform: scale(0.92);
 }
 
-/* Ações após tirar a foto */
+/* Botões depois da captura */
 #acoes {
   position: fixed;
 
-  z-index: 20;
+  z-index: 30;
 
   left: 0;
   right: 0;
   bottom: 0;
-
-  padding:
-    20px
-    22px
-    calc(25px + env(safe-area-inset-bottom));
 
   display: flex;
 
@@ -136,21 +153,23 @@ body {
 
   gap: 12px;
 
-  background:
-    linear-gradient(
-      to top,
-      rgba(0, 0, 0, 0.98),
-      rgba(0, 0, 0, 0.78),
-      rgba(0, 0, 0, 0)
-    );
+  padding:
+    20px
+    22px
+    calc(25px + env(safe-area-inset-bottom));
+
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.98),
+    rgba(0, 0, 0, 0.82),
+    rgba(0, 0, 0, 0)
+  );
 }
 
 #acoes button {
   width: min(100%, 360px);
 
   min-height: 52px;
-
-  border: none;
 
   border-radius: 28px;
 
@@ -163,20 +182,20 @@ body {
   cursor: pointer;
 }
 
-/* Botão principal */
 #salvar {
+  border: none;
+
   background: #fff;
 
   color: #000;
 }
 
-/* Botão secundário */
 #novaFoto {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+
   background: rgba(255, 255, 255, 0.18);
 
   color: #fff;
-
-  border: 1px solid rgba(255, 255, 255, 0.35) !important;
 }
 
 #canvas {
