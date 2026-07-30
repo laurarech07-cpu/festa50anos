@@ -26,20 +26,32 @@
         src="moldura.png"
         alt="Moldura da festa">
 
+      <img
+        id="fotoResultado"
+        alt="Foto final"
+        hidden>
+
     </div>
 
-    <button id="capturar">
-      📸 Tirar foto
-    </button>
+    <!-- Botão circular durante a câmera -->
+    <div id="controleCamera">
 
+      <button
+        id="capturar"
+        aria-label="Tirar foto">
+      </button>
+
+    </div>
+
+    <!-- Botões que aparecem somente depois da foto -->
     <div id="acoes" hidden>
 
-      <button id="compartilhar">
-        📲 Compartilhar no Instagram
+      <button id="salvar">
+        ⬇ Salvar imagem
       </button>
 
       <button id="novaFoto">
-        📷 Tirar outra foto
+        ↻ Tirar outra foto
       </button>
 
     </div>
