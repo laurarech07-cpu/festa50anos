@@ -284,8 +284,13 @@ async()=>{
 
 
 
-      fotoResultado.src =
-        fotoUrl;
+      fotoResultado.src = fotoUrl;
+
+console.log("CHEGOU AQUI - mostrar botoes");
+
+acoes.classList.remove("escondido");
+acoes.classList.add("ativo");
+acoes.style.display = "flex";
 
 
 
