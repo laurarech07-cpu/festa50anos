@@ -15,11 +15,12 @@ body {
   font-family: Arial, sans-serif;
 }
 
-/* Esta classe força o elemento a desaparecer */
+/* Esconde qualquer elemento que tenha esta classe */
 .escondido {
   display: none !important;
 }
 
+/* Página ocupando toda a tela */
 .container {
   position: relative;
   width: 100%;
@@ -28,25 +29,28 @@ body {
   background: #000;
 }
 
+/* Área da câmera */
 .camera-area {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   background: #000;
 }
 
-/* Câmera ocupando a tela inteira */
+/* Câmera ocupando toda a tela */
 #camera {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 
-  /* Espelha apenas a visualização */
+  /* Espelha a visualização da câmera frontal */
   transform: scaleX(-1);
 }
 
-/* Moldura por cima da câmera */
+/* Moldura posicionada sobre a câmera */
 #moldura {
   position: absolute;
   inset: 0;
@@ -63,7 +67,7 @@ body {
   z-index: 2;
 }
 
-/* Foto final */
+/* Foto final após a captura */
 #fotoResultado {
   position: absolute;
   inset: 0;
@@ -76,7 +80,7 @@ body {
   z-index: 5;
 }
 
-/* Área inferior da câmera */
+/* Área inferior onde aparece a bolinha de tirar foto */
 #controleCamera {
   position: fixed;
 
@@ -94,6 +98,8 @@ body {
 
   justify-content: center;
 
+  padding-bottom: env(safe-area-inset-bottom);
+
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.92),
@@ -101,7 +107,7 @@ body {
   );
 }
 
-/* Botão circular */
+/* Botão circular estilo câmera do iPhone */
 #capturar {
   position: relative;
 
@@ -110,15 +116,18 @@ body {
 
   padding: 0;
 
-  border: 5px solid #fff;
+  border: 5px solid #ffffff;
 
   border-radius: 50%;
 
   background: transparent;
 
   cursor: pointer;
+
+  -webkit-tap-highlight-color: transparent;
 }
 
+/* Círculo branco interno */
 #capturar::after {
   content: "";
 
@@ -128,14 +137,15 @@ body {
 
   border-radius: 50%;
 
-  background: #fff;
+  background: #ffffff;
 }
 
+/* Efeito ao tocar */
 #capturar:active {
   transform: scale(0.92);
 }
 
-/* Botões depois da captura */
+/* Área dos botões depois de tirar a foto */
 #acoes {
   position: fixed;
 
@@ -145,7 +155,10 @@ body {
   right: 0;
   bottom: 0;
 
-  display: flex;
+  /* IMPORTANTE:
+     começa escondida e só aparece
+     quando o JavaScript adiciona a classe "ativo" */
+  display: none;
 
   flex-direction: column;
 
@@ -166,38 +179,54 @@ body {
   );
 }
 
+/* Mostra os botões somente após a foto ser tirada */
+#acoes.ativo {
+  display: flex;
+}
+
+/* Estilo geral dos botões */
 #acoes button {
   width: min(100%, 360px);
 
   min-height: 52px;
 
-  border-radius: 28px;
-
   padding: 14px 24px;
+
+  border-radius: 28px;
 
   font-size: 17px;
 
   font-weight: 700;
 
   cursor: pointer;
+
+  -webkit-tap-highlight-color: transparent;
 }
 
+/* Botão principal: salvar */
 #salvar {
   border: none;
 
-  background: #fff;
+  background: #ffffff;
 
-  color: #000;
+  color: #000000;
 }
 
+/* Botão secundário: tirar outra foto */
 #novaFoto {
   border: 1px solid rgba(255, 255, 255, 0.4);
 
   background: rgba(255, 255, 255, 0.18);
 
-  color: #fff;
+  color: #ffffff;
 }
 
+/* Efeito ao tocar nos botões */
+#acoes button:active {
+  transform: scale(0.97);
+}
+
+/* Canvas usado para gerar a foto */
 #canvas {
   display: none;
 }
