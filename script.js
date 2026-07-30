@@ -11,49 +11,55 @@ const novaFoto = document.getElementById("novaFoto");
 
 const canvas = document.getElementById("canvas");
 
-let stream;
-let fotoUrl;
-let fotoFinal;
+let fotoBlob = null;
+let fotoUrl = null;
 
-// Abre automaticamente a câmera frontal
+// Abre a câmera frontal automaticamente
 async function abrirCamera() {
   try {
-    stream = await navigator.mediaDevices.getUserMedia({
+    const stream = await navigator.mediaDevices.getUserMedia({
       video: {
-        facingMode: "user"
+        facingMode: {
+          ideal: "user"
+        }
       },
       audio: false
     });
 
     camera.srcObject = stream;
 
+    await camera.play();
+
   } catch (erro) {
     console.error("Erro ao abrir a câmera:", erro);
 
     alert(
-      "Não foi possível acessar a câmera. " +
+      "Não foi possível abrir a câmera. " +
       "Verifique se você permitiu o acesso à câmera."
     );
   }
 }
 
-// Tira a foto
+// Captura a foto
 capturar.addEventListener("click", () => {
+
+  if (
+    !camera.videoWidth ||
+    !camera.videoHeight
+  ) {
+    alert("A câmera ainda está carregando. Aguarde alguns segundos.");
+    return;
+  }
 
   const largura = camera.videoWidth;
   const altura = camera.videoHeight;
-
-  if (!largura || !altura) {
-    alert("A câmera ainda está carregando. Tente novamente.");
-    return;
-  }
 
   canvas.width = largura;
   canvas.height = altura;
 
   const contexto = canvas.getContext("2d");
 
-  // Espelha a foto para ficar igual à prévia
+  // Espelha a foto para ficar igual à câmera
   contexto.save();
 
   contexto.translate(largura, 0);
@@ -81,37 +87,44 @@ capturar.addEventListener("click", () => {
 
   canvas.toBlob((blob) => {
 
-    fotoFinal = blob;
+    if (!blob) {
+      alert("Não foi possível gerar a foto.");
+      return;
+    }
+
+    fotoBlob = blob;
 
     fotoUrl = URL.createObjectURL(blob);
 
     fotoResultado.src = fotoUrl;
 
-    fotoResultado.hidden = false;
+    // Mostra a foto pronta
+    fotoResultado.classList.remove("escondido");
 
-    // Esconde câmera e moldura da prévia
-    camera.style.display = "none";
+    // Esconde câmera e moldura
+    camera.classList.add("escondido");
 
-    moldura.style.display = "none";
+    moldura.classList.add("escondido");
 
-    // Esconde o botão circular
-    controleCamera.hidden = true;
+    // Troca os controles
+    controleCamera.classList.add("escondido");
 
-    // Mostra as opções
-    acoes.hidden = false;
+    acoes.classList.remove("escondido");
 
   }, "image/png");
 
 });
 
-// Salva a imagem
+// Salva a foto
 salvar.addEventListener("click", () => {
 
-  if (!fotoFinal) return;
+  if (!fotoBlob) return;
+
+  const url = URL.createObjectURL(fotoBlob);
 
   const link = document.createElement("a");
 
-  link.href = URL.createObjectURL(fotoFinal);
+  link.href = url;
 
   link.download = "foto-50-anos.png";
 
@@ -119,32 +132,36 @@ salvar.addEventListener("click", () => {
 
   link.click();
 
-  document.body.removeChild(link);
+  link.remove();
 
   setTimeout(() => {
-    URL.revokeObjectURL(link.href);
-  }, 1000);
+    URL.revokeObjectURL(url);
+  }, 1500);
 
 });
 
-// Tira outra foto
+// Volta para a câmera
 novaFoto.addEventListener("click", () => {
 
   if (fotoUrl) {
     URL.revokeObjectURL(fotoUrl);
+
+    fotoUrl = null;
   }
 
   fotoResultado.src = "";
 
-  fotoResultado.hidden = true;
+  fotoResultado.classList.add("escondido");
 
-  camera.style.display = "block";
+  camera.classList.remove("escondido");
 
-  moldura.style.display = "block";
+  moldura.classList.remove("escondido");
 
-  controleCamera.hidden = false;
+  controleCamera.classList.remove("escondido");
 
-  acoes.hidden = true;
+  acoes.classList.add("escondido");
+
+  fotoBlob = null;
 
 });
 
