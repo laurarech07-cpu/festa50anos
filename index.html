@@ -4,41 +4,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>50 Anos</title>
+  <title>Foto 50 anos</title>
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <main class="pagina-inicial">
+  <div class="container">
 
-    <div class="conteudo">
+    <div class="camera-area">
 
-      <p class="brilho">✦ ✧ ✦</p>
+      <video
+        id="camera"
+        autoplay
+        playsinline>
+      </video>
 
-      <h1>
-        <span class="numero">50</span>
-        <span class="anos">anos</span>
-      </h1>
+      <img
+        id="moldura"
+        src="moldura.png"
+        alt="Moldura da festa">
 
-      <p class="nomes">
-        ANDREA, CÍNTIA, LISA,<br>
-        FABRÍCIA, LETÍCIA E LEILA
-      </p>
+    </div>
 
-      <p class="mensagem">
-        Registre este momento especial<br>
-        com a moldura oficial da festa.
-      </p>
+    <button id="capturar">
+      📸 Tirar foto
+    </button>
 
-      <button id="botaoFoto">
-        📸 TIRAR MINHA FOTO
+    <div id="acoes" hidden>
+
+      <button id="compartilhar">
+        📲 Compartilhar no Instagram
+      </button>
+
+      <button id="novaFoto">
+        📷 Tirar outra foto
       </button>
 
     </div>
 
-  </main>
+  </div>
+
+  <canvas id="canvas"></canvas>
 
   <script src="script.js"></script>
 
