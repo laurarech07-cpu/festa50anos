@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Foto 50 anos</title>
 
   <link rel="stylesheet" href="style.css">
+
 </head>
+
 
 <body>
 
+
   <div class="container">
 
+
     <div class="camera-area">
+
 
       <video
         id="camera"
@@ -21,20 +28,27 @@
         playsinline>
       </video>
 
+
       <img
         id="moldura"
         src="moldura.png"
         alt="Moldura da festa">
+
 
       <img
         id="fotoResultado"
         alt="Foto final"
         class="escondido">
 
+
     </div>
 
-    <!-- Aparece somente enquanto a câmera está aberta -->
+
+
+    <!-- CONTROLE DA CAMERA -->
+
     <div id="controleCamera">
+
 
       <button
         id="capturar"
@@ -42,26 +56,63 @@
         aria-label="Tirar foto">
       </button>
 
+
     </div>
 
-    <!-- Aparece somente depois da captura -->
+
+
+
+    <!-- AÇÕES APÓS FOTO -->
+
+
     <div id="acoes" class="escondido">
 
-      <button id="salvar" type="button">
-        Salvar ou Compartilhar
+
+      <button
+        id="salvar"
+        type="button">
+
+        💾 Salvar foto
+
       </button>
 
-      <button id="novaFoto" type="button">
-        Tirar outra foto
+
+
+      <button
+        id="compartilhar"
+        type="button">
+
+        📤 Compartilhar
+
       </button>
+
+
+
+      <button
+        id="novaFoto"
+        type="button">
+
+        📸 Tirar outra foto
+
+      </button>
+
 
     </div>
+
+
 
   </div>
 
+
+
+
   <canvas id="canvas"></canvas>
+
+
 
   <script src="script.js"></script>
 
+
 </body>
+
 </html>
