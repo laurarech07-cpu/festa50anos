@@ -16,18 +16,12 @@ let fotoBlob = null;
 let fotoUrl = null;
 
 
-/* =====================================================
-   ABRIR A CÂMERA FRONTAL
-===================================================== */
+/* ABRIR CÂMERA */
 
 async function abrirCamera() {
-
   try {
-
     stream = await navigator.mediaDevices.getUserMedia({
-
       video: {
-
         facingMode: {
           ideal: "user"
         },
@@ -39,605 +33,295 @@ async function abrirCamera() {
         height: {
           ideal: 1080
         }
-
       },
 
       audio: false
-
     });
 
     camera.srcObject = stream;
 
-    await new Promise((resolve) => {
-
-      camera.onloadedmetadata = resolve;
-
-    });
-
     await camera.play();
 
   } catch (erro) {
-
-    console.error(
-      "Erro ao abrir a câmera:",
-      erro
-    );
+    console.error("Erro ao abrir a câmera:", erro);
 
     alert(
-      "Não foi possível abrir a câmera. " +
-      "Verifique se você permitiu o acesso à câmera."
+      "Não foi possível abrir a câmera. Verifique se você permitiu o acesso."
     );
-
   }
-
 }
 
 
-/* =====================================================
-   TIRAR A FOTO
-===================================================== */
+/* TIRAR FOTO */
 
-capturar.addEventListener(
-  "click",
-  async () => {
+capturar.addEventListener("click", async () => {
 
-    /* Verifica se a câmera está pronta */
+  if (
+    camera.readyState < 2 ||
+    camera.videoWidth === 0 ||
+    camera.videoHeight === 0
+  ) {
+    alert("A câmera ainda está carregando. Aguarde alguns segundos.");
+    return;
+  }
 
-    if (
+  const larguraFinal = 1080;
+  const alturaFinal = 1920;
 
-      camera.readyState < 2 ||
+  canvas.width = larguraFinal;
+  canvas.height = alturaFinal;
 
-      camera.videoWidth === 0 ||
+  const contexto = canvas.getContext("2d");
 
-      camera.videoHeight === 0
+  contexto.imageSmoothingEnabled = true;
+  contexto.imageSmoothingQuality = "high";
 
-    ) {
+  const larguraVideo = camera.videoWidth;
+  const alturaVideo = camera.videoHeight;
 
-      alert(
-        "A câmera ainda está carregando. " +
-        "Aguarde alguns segundos e tente novamente."
-      );
+  const proporcaoFinal =
+    larguraFinal / alturaFinal;
 
-      return;
+  const proporcaoVideo =
+    larguraVideo / alturaVideo;
 
-    }
+  let origemX = 0;
+  let origemY = 0;
 
+  let larguraRecorte = larguraVideo;
+  let alturaRecorte = alturaVideo;
 
-    /* Tamanho final do Story */
 
-    const larguraFinal = 1080;
+  /* RECORTE SEM DEFORMAR */
 
-    const alturaFinal = 1920;
+  if (proporcaoVideo > proporcaoFinal) {
 
+    larguraRecorte =
+      alturaVideo * proporcaoFinal;
 
-    /* Configura o Canvas */
+    origemX =
+      (larguraVideo - larguraRecorte) / 2;
 
-    canvas.width = larguraFinal;
+  } else {
 
-    canvas.height = alturaFinal;
+    alturaRecorte =
+      larguraVideo / proporcaoFinal;
 
-
-    const contexto =
-      canvas.getContext("2d");
-
-
-    contexto.imageSmoothingEnabled = true;
-
-    contexto.imageSmoothingQuality = "high";
-
-
-    /* Dimensões reais da câmera */
-
-    const larguraVideo =
-      camera.videoWidth;
-
-    const alturaVideo =
-      camera.videoHeight;
-
-
-    /* Proporção final: 9:16 */
-
-    const proporcaoFinal =
-      larguraFinal /
-      alturaFinal;
-
-
-    /* Proporção recebida da câmera */
-
-    const proporcaoVideo =
-      larguraVideo /
-      alturaVideo;
-
-
-    let origemX = 0;
-
-    let origemY = 0;
-
-    let larguraRecorte =
-      larguraVideo;
-
-    let alturaRecorte =
-      alturaVideo;
-
-
-    /* Faz o recorte sem deformar */
-
-    if (
-      proporcaoVideo >
-      proporcaoFinal
-    ) {
-
-      /* A câmera é mais larga */
-
-      larguraRecorte =
-        alturaVideo *
-        proporcaoFinal;
-
-      origemX =
-        (
-          larguraVideo -
-          larguraRecorte
-        ) / 2;
-
-    } else {
-
-      /* A câmera é mais alta */
-
-      alturaRecorte =
-        larguraVideo /
-        proporcaoFinal;
-
-      origemY =
-        (
-          alturaVideo -
-          alturaRecorte
-        ) / 2;
-
-    }
-
-
-    /* Fundo preto */
-
-    contexto.fillStyle = "#000";
-
-    contexto.fillRect(
-      0,
-      0,
-      larguraFinal,
-      alturaFinal
-    );
-
-
-    /* Desenha a foto espelhada */
-
-    contexto.save();
-
-    contexto.translate(
-      larguraFinal,
-      0
-    );
-
-    contexto.scale(
-      -1,
-      1
-    );
-
-
-    contexto.drawImage(
-
-      camera,
-
-      origemX,
-      origemY,
-
-      larguraRecorte,
-      alturaRecorte,
-
-      0,
-      0,
-
-      larguraFinal,
-      alturaFinal
-
-    );
-
-
-    contexto.restore();
-
-
-    /* Aguarda a moldura carregar */
-
-    if (
-      !moldura.complete
-    ) {
-
-      await new Promise(
-        (resolve) => {
-
-          moldura.onload =
-            resolve;
-
-        }
-      );
-
-    }
-
-
-    /* Aplica a moldura */
-
-    contexto.drawImage(
-
-      moldura,
-
-      0,
-      0,
-
-      larguraFinal,
-      alturaFinal
-
-    );
-
-
-    /* Gera a imagem em PNG */
-
-    canvas.toBlob(
-
-      (blob) => {
-
-        if (!blob) {
-
-          alert(
-            "Não foi possível gerar a foto."
-          );
-
-          return;
-
-        }
-
-
-        /* Salva a imagem na memória */
-
-        fotoBlob = blob;
-
-
-        /* Cria a prévia */
-
-        fotoUrl =
-          URL.createObjectURL(
-            blob
-          );
-
-
-        fotoResultado.src =
-          fotoUrl;
-
-
-        /* Espera a imagem carregar */
-
-        fotoResultado.onload =
-          () => {
-
-
-            /* Mostra a foto */
-
-            fotoResultado
-              .classList
-              .remove(
-                "escondido"
-              );
-
-
-            /* Esconde a câmera */
-
-            camera
-              .classList
-              .add(
-                "escondido"
-              );
-
-
-            /* Esconde a moldura */
-
-            moldura
-              .classList
-              .add(
-                "escondido"
-              );
-
-
-            /* Esconde a bolinha */
-
-            controleCamera
-              .classList
-              .add(
-                "escondido"
-              );
-
-
-            /* Mostra os botões */
-
-            acoes
-              .classList
-              .add(
-                "ativo"
-              );
-
-          };
-
-      },
-
-      "image/png"
-
-    );
+    origemY =
+      (alturaVideo - alturaRecorte) / 2;
 
   }
-);
 
 
-/* =====================================================
-   SALVAR OU COMPARTILHAR
-===================================================== */
+  /* DESENHA A FOTO ESPELHADA */
 
-salvar.addEventListener(
-  "click",
-  async () => {
+  contexto.fillStyle = "#000";
+  contexto.fillRect(
+    0,
+    0,
+    larguraFinal,
+    alturaFinal
+  );
 
-    if (!fotoBlob) {
+  contexto.save();
 
-      alert(
-        "A foto ainda não foi gerada."
-      );
+  contexto.translate(
+    larguraFinal,
+    0
+  );
 
-      return;
+  contexto.scale(
+    -1,
+    1
+  );
 
-    }
+  contexto.drawImage(
+    camera,
 
+    origemX,
+    origemY,
 
-    /* Cria o arquivo da foto */
+    larguraRecorte,
+    alturaRecorte,
 
-    const arquivo =
-      new File(
+    0,
+    0,
 
-        [fotoBlob],
+    larguraFinal,
+    alturaFinal
+  );
 
-        "foto-50-anos.png",
+  contexto.restore();
 
-        {
 
-          type:
-            "image/png"
+  /* APLICA A MOLDURA */
 
-        }
-
-      );
-
-
-    try {
-
-
-      /* Tenta abrir o compartilhamento nativo */
-
-      if (
-
-        navigator.share &&
-
-        navigator.canShare &&
-
-        navigator.canShare({
-
-          files:
-            [arquivo]
-
-        })
-
-      ) {
-
-
-        await navigator.share({
-
-          title:
-            "Foto dos 50 anos",
-
-          text:
-            "Minha foto da festa! ✨",
-
-          files:
-            [arquivo]
-
-        });
-
-
-        return;
-
-      }
-
-
-    } catch (erro) {
-
-
-      /* A pessoa fechou o menu */
-
-      if (
-
-        erro.name ===
-        "AbortError"
-
-      ) {
-
-        return;
-
-      }
-
-
-      console.log(
-
-        "Compartilhamento não disponível:",
-
-        erro
-
-      );
-
-    }
-
-
-    /* ================================================
-       ALTERNATIVA PARA XIAOMI E OUTROS ANDROIDS
-    ================================================= */
-
-
-    const url =
-      URL.createObjectURL(
-        fotoBlob
-      );
-
-
-    /* Tenta abrir a foto em uma nova aba */
-
-    const novaAba =
-      window.open(
-
-        url,
-
-        "_blank"
-
-      );
-
-
-    /* Se o navegador bloquear a nova aba,
-       tenta fazer o download */
-
-    if (!novaAba) {
-
-
-      const link =
-        document.createElement(
-          "a"
-        );
-
-
-      link.href =
-        url;
-
-
-      link.download =
-        "foto-50-anos.png";
-
-
-      document.body
-        .appendChild(
-          link
-        );
-
-
-      link.click();
-
-
-      link.remove();
-
-    }
-
-
-    /* Mantém a imagem disponível por 1 minuto */
-
-    setTimeout(
-
-      () => {
-
-        URL.revokeObjectURL(
-          url
-        );
-
-      },
-
-      60000
-
-    );
-
+  if (!moldura.complete) {
+    await new Promise((resolve) => {
+      moldura.onload = resolve;
+    });
   }
-);
+
+  contexto.drawImage(
+    moldura,
+    0,
+    0,
+    larguraFinal,
+    alturaFinal
+  );
 
 
-/* =====================================================
-   TIRAR OUTRA FOTO
-===================================================== */
+  /* GERA A FOTO */
 
-novaFoto.addEventListener(
-  "click",
-  () => {
+  canvas.toBlob((blob) => {
 
+    if (!blob) {
+      alert("Não foi possível gerar a foto.");
+      return;
+    }
 
-    /* Libera a imagem anterior */
+    fotoBlob = blob;
 
     if (fotoUrl) {
-
-      URL.revokeObjectURL(
-        fotoUrl
-      );
-
-      fotoUrl = null;
-
+      URL.revokeObjectURL(fotoUrl);
     }
 
+    fotoUrl = URL.createObjectURL(blob);
 
-    /* Limpa a prévia */
-
-    fotoResultado.src =
-      "";
+    fotoResultado.src = fotoUrl;
 
 
-    fotoResultado
-      .classList
-      .add(
-        "escondido"
-      );
+    /*
+      MOSTRA A FOTO E OS BOTÕES
+      SEM DEPENDER DO EVENTO ONLOAD
+    */
+
+    fotoResultado.classList.remove("escondido");
+
+    camera.classList.add("escondido");
+
+    moldura.classList.add("escondido");
+
+    controleCamera.classList.add("escondido");
+
+    acoes.classList.add("ativo");
+
+  }, "image/png");
+
+});
 
 
-    /* Mostra novamente a câmera */
+/* SALVAR OU COMPARTILHAR */
 
-    camera
-      .classList
-      .remove(
-        "escondido"
-      );
+salvar.addEventListener("click", async () => {
 
-
-    /* Mostra a moldura */
-
-    moldura
-      .classList
-      .remove(
-        "escondido"
-      );
-
-
-    /* Mostra a bolinha */
-
-    controleCamera
-      .classList
-      .remove(
-        "escondido"
-      );
-
-
-    /* Esconde os botões */
-
-    acoes
-      .classList
-      .remove(
-        "ativo"
-      );
-
-
-    /* Limpa a foto anterior */
-
-    fotoBlob = null;
-
+  if (!fotoBlob) {
+    alert("A foto ainda não foi gerada.");
+    return;
   }
-);
+
+  const arquivo = new File(
+    [fotoBlob],
+    "foto-50-anos.png",
+    {
+      type: "image/png"
+    }
+  );
+
+  try {
+
+    if (
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({
+        files: [arquivo]
+      })
+    ) {
+
+      await navigator.share({
+        title: "Foto dos 50 anos",
+        text: "Minha foto da festa! ✨",
+        files: [arquivo]
+      });
+
+      return;
+    }
+
+  } catch (erro) {
+
+    if (erro.name === "AbortError") {
+      return;
+    }
+
+    console.error(
+      "Erro ao compartilhar:",
+      erro
+    );
+  }
 
 
-/* =====================================================
-   INICIAR A CÂMERA
-===================================================== */
+  /* ALTERNATIVA PARA NAVEGADORES SEM COMPARTILHAMENTO */
+
+  const url =
+    URL.createObjectURL(fotoBlob);
+
+  const link =
+    document.createElement("a");
+
+  link.href = url;
+
+  link.download =
+    "foto-50-anos.png";
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  link.remove();
+
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 2000);
+
+});
+
+
+/* TIRAR OUTRA FOTO */
+
+novaFoto.addEventListener("click", () => {
+
+  if (fotoUrl) {
+    URL.revokeObjectURL(fotoUrl);
+    fotoUrl = null;
+  }
+
+  fotoResultado.src = "";
+
+  fotoResultado.classList.add(
+    "escondido"
+  );
+
+  camera.classList.remove(
+    "escondido"
+  );
+
+  moldura.classList.remove(
+    "escondido"
+  );
+
+  controleCamera.classList.remove(
+    "escondido"
+  );
+
+  acoes.classList.remove(
+    "ativo"
+  );
+
+  fotoBlob = null;
+
+});
+
+
+/* INICIA A CÂMERA */
 
 abrirCamera();
