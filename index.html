@@ -29,29 +29,30 @@
       <img
         id="fotoResultado"
         alt="Foto final"
-        hidden>
+        class="escondido">
 
     </div>
 
-    <!-- Botão circular durante a câmera -->
+    <!-- Aparece somente enquanto a câmera está aberta -->
     <div id="controleCamera">
 
       <button
         id="capturar"
+        type="button"
         aria-label="Tirar foto">
       </button>
 
     </div>
 
-    <!-- Botões que aparecem somente depois da foto -->
-    <div id="acoes" hidden>
+    <!-- Aparece somente depois da captura -->
+    <div id="acoes" class="escondido">
 
-      <button id="salvar">
-        ⬇ Salvar imagem
+      <button id="salvar" type="button">
+        Salvar imagem
       </button>
 
-      <button id="novaFoto">
-        ↻ Tirar outra foto
+      <button id="novaFoto" type="button">
+        Tirar outra foto
       </button>
 
     </div>
