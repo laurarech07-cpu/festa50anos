@@ -14,62 +14,48 @@ const canvas = document.getElementById("canvas");
 let fotoBlob = null;
 let fotoUrl = null;
 
-// Abre a câmera frontal solicitando alta resolução
+// Abre a câmera frontal
 async function abrirCamera() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
-        facingMode: {
-          ideal: "user"
-        },
-
+        facingMode: "user",
         width: {
           ideal: 1920
         },
-
         height: {
           ideal: 1080
-        },
-
-        frameRate: {
-          ideal: 30
         }
       },
-
       audio: false
     });
 
     camera.srcObject = stream;
 
+    await new Promise((resolve) => {
+      camera.onloadedmetadata = resolve;
+    });
+
     await camera.play();
 
-    console.log(
-      "Resolução da câmera:",
-      camera.videoWidth,
-      "x",
-      camera.videoHeight
-    );
-
   } catch (erro) {
-
-    console.error(
-      "Erro ao abrir a câmera:",
-      erro
-    );
+    console.error("Erro ao abrir a câmera:", erro);
 
     alert(
       "Não foi possível abrir a câmera. " +
-      "Verifique se você permitiu o acesso à câmera."
+      "Verifique se você permitiu o acesso."
     );
   }
 }
 
-// Captura a foto em 1080 x 1920
-capturar.addEventListener("click", () => {
+// Captura a foto
+capturar.addEventListener("click", async () => {
 
+  // Garante que a câmera está pronta
   if (
-    !camera.videoWidth ||
-    !camera.videoHeight
+    camera.readyState < 2 ||
+    camera.videoWidth === 0 ||
+    camera.videoHeight === 0
   ) {
     alert(
       "A câmera ainda está carregando. " +
@@ -79,96 +65,58 @@ capturar.addEventListener("click", () => {
     return;
   }
 
-  // Tamanho final fixo
+  // Resultado final: Story 1080 x 1920
   const larguraFinal = 1080;
   const alturaFinal = 1920;
 
   canvas.width = larguraFinal;
   canvas.height = alturaFinal;
 
-  const contexto = canvas.getContext("2d", {
-    alpha: false
-  });
+  const contexto = canvas.getContext("2d");
 
-  // Qualidade máxima de redimensionamento
   contexto.imageSmoothingEnabled = true;
-
   contexto.imageSmoothingQuality = "high";
 
-  // Fundo preto
-  contexto.fillStyle = "#000";
-
-  contexto.fillRect(
-    0,
-    0,
-    larguraFinal,
-    alturaFinal
-  );
-
+  // Dimensões reais do vídeo
   const larguraVideo = camera.videoWidth;
-
   const alturaVideo = camera.videoHeight;
 
-  // Proporção do resultado: 9:16
+  // Calcula um recorte 9:16 sem deformar
   const proporcaoFinal =
     larguraFinal / alturaFinal;
 
-  // Proporção original da câmera
   const proporcaoVideo =
     larguraVideo / alturaVideo;
 
-  let larguraRecorte;
-  let alturaRecorte;
+  let origemX = 0;
+  let origemY = 0;
 
-  let origemX;
-  let origemY;
+  let larguraRecorte = larguraVideo;
+  let alturaRecorte = alturaVideo;
 
-  // Faz um recorte central sem deformar
-  if (
-    proporcaoVideo >
-    proporcaoFinal
-  ) {
+  if (proporcaoVideo > proporcaoFinal) {
 
     // Vídeo mais largo:
     // corta as laterais
-    alturaRecorte =
-      alturaVideo;
-
     larguraRecorte =
-      alturaVideo *
-      proporcaoFinal;
+      alturaVideo * proporcaoFinal;
 
     origemX =
-      (
-        larguraVideo -
-        larguraRecorte
-      ) / 2;
-
-    origemY = 0;
+      (larguraVideo - larguraRecorte) / 2;
 
   } else {
 
     // Vídeo mais alto:
-    // corta parte de cima e de baixo
-    larguraRecorte =
-      larguraVideo;
-
+    // corta em cima e embaixo
     alturaRecorte =
-      larguraVideo /
-      proporcaoFinal;
-
-    origemX = 0;
+      larguraVideo / proporcaoFinal;
 
     origemY =
-      (
-        alturaVideo -
-        alturaRecorte
-      ) / 2;
+      (alturaVideo - alturaRecorte) / 2;
 
   }
 
-  // Espelha a imagem para ficar igual
-  // à visualização da câmera
+  // Desenha o vídeo espelhado
   contexto.save();
 
   contexto.translate(
@@ -199,23 +147,27 @@ capturar.addEventListener("click", () => {
 
   contexto.restore();
 
+  // Espera a moldura estar carregada
+  if (!moldura.complete) {
+    await new Promise((resolve) => {
+      moldura.onload = resolve;
+    });
+  }
+
   // Aplica a moldura
   contexto.drawImage(
     moldura,
-
     0,
     0,
-
     larguraFinal,
     alturaFinal
   );
 
-  // Gera PNG sem compressão com perda
+  // Gera a imagem
   canvas.toBlob(
     (blob) => {
 
       if (!blob) {
-
         alert(
           "Não foi possível gerar a foto."
         );
@@ -231,30 +183,32 @@ capturar.addEventListener("click", () => {
       fotoResultado.src =
         fotoUrl;
 
-      // Mostra a foto final
-      fotoResultado
-        .classList
-        .remove("escondido");
+      fotoResultado.onload = () => {
 
-      // Esconde a câmera
-      camera
-        .classList
-        .add("escondido");
+        // Só troca para a foto
+        // depois que ela carregou
+        fotoResultado
+          .classList
+          .remove("escondido");
 
-      // Esconde a moldura da prévia
-      moldura
-        .classList
-        .add("escondido");
+        camera
+          .classList
+          .add("escondido");
 
-      // Esconde o botão circular
-      controleCamera
-        .classList
-        .add("escondido");
+        moldura
+          .classList
+          .add("escondido");
 
-      // Mostra as ações
-      acoes
-        .classList
-        .remove("escondido");
+        controleCamera
+          .classList
+          .add("escondido");
+
+        // Mostra os botões
+        acoes
+          .classList
+          .add("ativo");
+
+      };
 
     },
 
@@ -263,8 +217,7 @@ capturar.addEventListener("click", () => {
 
 });
 
-// Abre o compartilhamento do iPhone
-// para permitir "Salvar Imagem"
+// Salvar no celular
 salvar.addEventListener(
   "click",
   async () => {
@@ -274,9 +227,7 @@ salvar.addEventListener(
     const arquivo =
       new File(
         [fotoBlob],
-
         "foto-50-anos.png",
-
         {
           type: "image/png"
         }
@@ -284,8 +235,6 @@ salvar.addEventListener(
 
     try {
 
-      // No iPhone, abre o menu nativo
-      // de compartilhamento
       if (
         navigator.share &&
         navigator.canShare &&
@@ -295,22 +244,14 @@ salvar.addEventListener(
       ) {
 
         await navigator.share({
-
           title:
             "Foto dos 50 anos",
-
-          text:
-            "Minha foto da festa! ✨",
-
           files:
             [arquivo]
-
         });
 
       } else {
 
-        // Alternativa para navegadores
-        // que não suportam compartilhar
         const url =
           URL.createObjectURL(
             fotoBlob
@@ -333,32 +274,22 @@ salvar.addEventListener(
 
         setTimeout(
           () => {
-
-            URL.revokeObjectURL(
-              url
-            );
-
+            URL.revokeObjectURL(url);
           },
-
-          1500
+          1000
         );
 
       }
 
     } catch (erro) {
 
-      // Não mostra erro se a pessoa
-      // apenas fechar o menu
       if (
         erro.name !==
         "AbortError"
       ) {
-
         console.error(
-          "Erro ao compartilhar:",
           erro
         );
-
       }
 
     }
@@ -366,7 +297,7 @@ salvar.addEventListener(
   }
 );
 
-// Volta para a câmera
+// Tirar outra foto
 novaFoto.addEventListener(
   "click",
   () => {
@@ -401,7 +332,7 @@ novaFoto.addEventListener(
 
     acoes
       .classList
-      .add("escondido");
+      .remove("ativo");
 
     fotoBlob = null;
 
